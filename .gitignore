@@ -1,0 +1,24 @@
+# Build sonuçları
+bin/
+obj/
+
+# Kullanıcı ayarları
+*.user
+*.userosscache
+*.sln.docstates
+
+# Publish çıktıları
+*.Publish.xml
+*.pubxml
+*.pubxml.user
+
+# Rider / VS Code / VS
+.vs/
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# Diğer
+[Bb]uild/

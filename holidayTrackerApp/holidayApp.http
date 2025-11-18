@@ -1,0 +1,6 @@
+@HolidayTrackerApp_HostAddress = http://localhost:5062
+
+GET {{HolidayTrackerApp_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
