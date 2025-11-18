@@ -14,5 +14,5 @@ namespace HolidayTrackerApp.Infrastructure
 
             return new AppDbContext(options);
         }
-    
+    }
 }
