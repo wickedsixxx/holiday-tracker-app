@@ -23,4 +23,8 @@
     <ProjectReference Include="..\HolidayTrackerApp.Infrastructure\HolidayTrackerApp.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ClientApp\" />
+  </ItemGroup>
+
 </Project>
