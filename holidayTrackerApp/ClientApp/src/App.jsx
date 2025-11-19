@@ -1,5 +1,4 @@
 ﻿import React, { useState, useEffect, createContext, useContext } from 'react';
-import ReactDOM from 'react-dom/client';
 import axios from 'axios';
 
 // --- SABİTLER ---
@@ -13,6 +12,19 @@ const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(localStorage.getItem('token'));
     const [loading, setLoading] = useState(true);
+
+    // Hata Çözümü: logout fonksiyonunu useEffect'ten önce tanımladık
+    const logout = () => {
+        localStorage.removeItem('token');
+        setToken(null);
+        setUser(null);
+        delete axios.defaults.headers.common['Authorization'];
+    };
+
+    const login = (token) => {
+        localStorage.setItem('token', token);
+        setToken(token);
+    };
 
     useEffect(() => {
         if (token) {
@@ -32,18 +44,6 @@ const AuthProvider = ({ children }) => {
         }
         setLoading(false);
     }, [token]);
-
-    const login = (token) => {
-        localStorage.setItem('token', token);
-        setToken(token);
-    };
-
-    const logout = () => {
-        localStorage.removeItem('token');
-        setToken(null);
-        setUser(null);
-        delete axios.defaults.headers.common['Authorization'];
-    };
 
     return (
         <AuthContext.Provider value={{ user, token, loading, login, logout }}>
@@ -252,11 +252,13 @@ const App = () => {
         return <div className="flex justify-center items-center h-screen text-xl text-indigo-600">Yükleniyor...</div>;
     }
 
+    // Uygulama ilk açıldığında kullanıcı yoksa, AuthProvider'dan gelen kullanıcının olmadığını kontrol edip Login ekranını gösterir.
     if (!user) {
         return <AuthScreen />;
     }
 
     return (
+        // Uygulama ana çatısı
         <div className="min-h-screen bg-gray-100">
             <header className="bg-indigo-600 text-white p-4 flex justify-between items-center shadow-lg">
                 <span className="text-2xl font-bold">Tatil Takip Sistemi</span>
@@ -278,19 +280,9 @@ const App = () => {
     );
 };
 
-// --- UYGULAMA BAŞLANGICI ---
-const rootElement = document.getElementById('root');
-if (rootElement) {
-    ReactDOM.createRoot(rootElement).render(
-        <React.StrictMode>
-            <AuthProvider>
-                <App />
-            </AuthProvider>
-        </React.StrictMode>
-    );
-} else {
-    console.error("HTML'de id='root' elementi bulunamadı. Lütfen index.html dosyasını kontrol edin.");
-}
+// --- UYGULAMA BAŞLANGICI VE DIŞA AKTARIM ---
 
-// NOTE: Bu kod Tailwind CSS sınıflarını kullanır.
-// NOTE: Axios'un kurulu olduğundan emin olun (npm install axios).
+// Sadece App bileşenini dışa aktarıyoruz.
+// ReactDOM.createRoot ve AuthProvider sarmalaması main.jsx dosyasında yapılmalıdır.
+export { AuthProvider, useAuth };
+export default App;
