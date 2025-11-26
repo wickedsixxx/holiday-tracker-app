@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // --- SABİTLER ---
 // API BASE URL'i: Backend adresinizi buraya yazın (Genellikle 5013)
-const API_BASE_URL = 'http://localhost:5013/api';
+const API_BASE_URL = '/api';
 
 // --- 1. AUTH CONTEXT: Oturum Yönetimi ---
 const AuthContext = createContext();
