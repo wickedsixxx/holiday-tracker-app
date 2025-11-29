@@ -1,17 +1,17 @@
-﻿using System.Security.Claims;
-using System.Text;
-using HolidayTrackerApp.Application.Common.Authentication;
-using HolidayTrackerApp.Application.Common.Services;
-using HolidayTrackerApp.Domain;
-using HolidayTrackerApp.Domain.Entities;
-using HolidayTrackerApp.Domain.Enums;
-using HolidayTrackerApp.Infrastructure;
-using HolidayTrackerApp.Infrastructure.Data;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using System.Threading.Tasks;
+using System;
+using System.Linq;
+
+// 👇 Bu satırlar kritik, hepsinin olduğundan emin ol:
+using HolidayTrackerApp.Domain;                 // Employee için
+using HolidayTrackerApp.Domain.Enums;           // RoleName için
+using HolidayTrackerApp.Domain.Entities;        // Bazen entityler burada olabilir
+using HolidayTrackerApp.Application.DTOs;       // LoginDto, RegisterRequest için
+using HolidayTrackerApp.Application.Interfaces; // IAuthenticationService için
+using HolidayTrackerApp.Infrastructure.Data;    // AppDbContext için (Genelde buradadır)
+// Eğer Data klasörü yoksa şunu dene: using HolidayTrackerApp.Infrastructure;
 
 namespace HolidayTrackerApp.Api.Controllers
 {
