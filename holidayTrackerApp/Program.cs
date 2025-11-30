@@ -1,5 +1,10 @@
+using HolidayTrackerApp.Domain;
+using HolidayTrackerApp.Domain.Enums;
 using HolidayTrackerApp.Infrastructure;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,8 +32,16 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlite(connectionString));
 
+// Program.cs - builder.Services bölümüne ekle
+
+builder.Services.AddIdentity<Employee, IdentityRole<Guid>>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 var app = builder.Build();
 
@@ -64,5 +77,20 @@ app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+
+    // Roller yoksa oluþturulmasýný saðla
+    if (!await roleManager.RoleExistsAsync(RoleName.Manager.ToString()))
+    {
+        await roleManager.CreateAsync(new IdentityRole<Guid>(RoleName.Manager.ToString()));
+    }
+    if (!await roleManager.RoleExistsAsync(RoleName.Employee.ToString()))
+    {
+        await roleManager.CreateAsync(new IdentityRole<Guid>(RoleName.Employee.ToString()));
+    }
+}
 
 app.Run();

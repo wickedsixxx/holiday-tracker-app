@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System;
 using System.Linq;
@@ -10,7 +11,7 @@ using HolidayTrackerApp.Domain.Enums;           // RoleName için
 using HolidayTrackerApp.Domain.Entities;        // Bazen entityler burada olabilir
 using HolidayTrackerApp.Application.DTOs;       // LoginDto, RegisterRequest için
 using HolidayTrackerApp.Application.Interfaces; // IAuthenticationService için
-using HolidayTrackerApp.Infrastructure.Data;    // AppDbContext için (Genelde buradadır)
+using HolidayTrackerApp.Infrastructure;    // AppDbContext için (Genelde buradadır)
 // Eğer Data klasörü yoksa şunu dene: using HolidayTrackerApp.Infrastructure;
 
 namespace HolidayTrackerApp.Api.Controllers
@@ -69,20 +70,24 @@ namespace HolidayTrackerApp.Api.Controllers
 
             if (result.Succeeded)
             {
-                // İlk kayıt olan kullanıcıya Yönetici (Manager) rolü ata
+                // 1. Rolü Belirle (String olarak bir değişkende tutalım)
+                string roleName = RoleName.Employee.ToString(); // Varsayılan olarak Employee
+
+                // Eğer sistemdeki ilk kullanıcı ise onu Manager (Yönetici) yapalım
                 if (!_userManager.Users.Any(u => u.Id != employee.Id))
                 {
-                    await _userManager.AddToRoleAsync(employee, RoleName.Manager.ToString());
-                    employee.Role = RoleName.Manager;
-                }
-                else
-                {
-                    await _userManager.AddToRoleAsync(employee, RoleName.Employee.ToString());
-                    employee.Role = RoleName.Employee;
+                    roleName = RoleName.Manager.ToString();
                 }
 
-                // Kullanıcıya hemen token döndürerek giriş yapmış gibi yap
-                var token = _authenticationService.CreateToken(employee.Id.ToString(), employee.Email, employee.Role.ToString());
+                // 2. Rolü Veritabanına İşle (Identity sistemi bunu 'AspNetUserRoles' tablosuna yazar)
+                await _userManager.AddToRoleAsync(employee, roleName);
+
+                // ❌ SİLDİĞİMİZ KISIM: employee.Role = ... (Buna gerek yok, hata veren yer burasıydı)
+
+                // 3. Token Oluştur (Değişkendeki 'roleName'i kullanıyoruz)
+                // Burada artık employee.Role değil, yukarıda belirlediğimiz roleName değişkenini veriyoruz.
+                var token = _authenticationService.CreateToken(employee.Id.ToString(), employee.Email, roleName);
+
                 return Ok(new { Token = token, Message = "Kayıt başarılı, giriş yapıldı." });
             }
 

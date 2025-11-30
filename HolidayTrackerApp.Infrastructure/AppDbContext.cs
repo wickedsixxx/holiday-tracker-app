@@ -1,14 +1,23 @@
-﻿using HolidayTrackerApp.Domain;
-using HolidayTrackerApp.Domain.Entities;
+﻿using HolidayTrackerApp.Domain.Entities; // Eğer Employee sınıfınız bu namespace'deyse
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using HolidayTrackerApp.Domain; // Employee sınıfının bulunduğu namespace
 
 namespace HolidayTrackerApp.Infrastructure
 {
-    public sealed class AppDbContext : DbContext
+    // IdentityDbContext<TUser, TRole, TKey> formatı:
+    // TUser: Employee
+    // TRole: IdentityRole<Guid>
+    // TKey: Guid (Employee'nin Id tipi)
+    public sealed class AppDbContext : IdentityDbContext<Employee, IdentityRole<Guid>, Guid>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         { }
-        public DbSet<Employee> Employees { get; set; }
+
+        // Employee için DbSet'i IdentityDbContext otomatik tanımladığı için yoruma alıyoruz/siliyoruz.
+        // public DbSet<Employee> Employees { get; set; }
+
         public DbSet<LeavePolicy> LeavePolicies { get; set; }
         public DbSet<LeaveBalance> LeaveBalances { get; set; }
         public DbSet<LeaveRequest> LeaveRequests { get; set; }
@@ -18,42 +27,33 @@ namespace HolidayTrackerApp.Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Identity tablolarının doğru oluşturulması için bu satır en başta OLMALIDIR.
+            base.OnModelCreating(modelBuilder);
+
+            // Employee tablosu için Identity'nin varsayılanları üzerine kendi benzersiz indexinizi ekleyin
             modelBuilder.Entity<Employee>()
                  .HasIndex(e => e.EmployeeNo)
-                  .IsUnique();
+                 .IsUnique();
 
+            // Diğer Fluent API konfigürasyonlarınız...
             modelBuilder.Entity<LeaveBalance>()
-                   .HasKey(l => new { l.EmployeeId, l.Year });
+                .HasKey(l => new { l.EmployeeId, l.Year });
 
             modelBuilder.Entity<Holiday>()
-                  .HasIndex(h => new { h.Year, h.Date })
-                  .IsUnique();
+                .HasIndex(h => new { h.Year, h.Date })
+                .IsUnique();
 
-
-            // WeekendDay tablosu ve ilişkisi
             modelBuilder.Entity<WeekendDay>(e =>
-{
-    e.ToTable("WeekendDays");
-    e.HasKey(x => x.Id);
-
-    // Day (DayOfWeek) enum'unu int olarak sakla
-    e.Property(x => x.Day).HasConversion<int>();
-
-    // İlişki: WeekendPolicy 1 — N WeekendDay
-    e.HasOne(x => x.WeekendPolicy)
-     .WithMany(p => p.WeekendDays)
-     .HasForeignKey(x => x.WeekendPolicyId)
-     .OnDelete(DeleteBehavior.Cascade);
-
-    // Aynı policy’de aynı gün bir kez olsun
-    e.HasIndex(x => new { x.WeekendPolicyId, x.Day }).IsUnique();
-});
-
-
-
-            base.OnModelCreating(modelBuilder);
+            {
+                e.ToTable("WeekendDays");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Day).HasConversion<int>();
+                e.HasOne(x => x.WeekendPolicy)
+                 .WithMany(p => p.WeekendDays)
+                 .HasForeignKey(x => x.WeekendPolicyId)
+                 .OnDelete(DeleteBehavior.Cascade);
+                e.HasIndex(x => new { x.WeekendPolicyId, x.Day }).IsUnique();
+            });
         }
     }
-
-
 }

@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity; // <-- Bu kütüphaneyi ekledik
+﻿using Microsoft.AspNetCore.Identity; // IdentityUser<Guid> sınıfı için gerekli
 
 namespace HolidayTrackerApp.Domain;
 
-// IdentityUser<Guid> diyerek hem Email, Password gibi alanları hazır alıyoruz
-// Hem de ID'nin Guid olacağını söylüyoruz.
+// Employee, IdentityUser'dan miras alıyor ve Id tipinin Guid olduğunu belirtiyor.
+// Bu doğru bir yaklaşımdır.
 public sealed class Employee : IdentityUser<Guid>
 {
-    // public Guid Id { get; set; } <-- BUNU SİLDİK! (Çünkü IdentityUser'ın içinde zaten Id var, çakışmasın)
+    // Id, UserName, Email, PasswordHash vb. alanları IdentityUser<Guid> sınıfından devralındı.
 
     public string EmployeeNo { get; set; } = "";
     public string FirstName { get; set; } = "";
