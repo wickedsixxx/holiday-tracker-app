@@ -43,6 +43,7 @@ namespace HolidayTrackerApp.Infrastructure
 
             modelBuilder.Entity<WeekendDay>(e =>
             {
+
                 e.ToTable("WeekendDays");
                 e.HasKey(x => x.Id);
                 e.Property(x => x.Day).HasConversion<int>();
