@@ -3,7 +3,7 @@
 namespace HolidayTrackerApp.Domain;
 
 // Employee, IdentityUser'dan miras alıyor ve Id tipinin Guid olduğunu belirtiyor.
-// Bu doğru bir yaklaşımdır.
+
 public sealed class Employee : IdentityUser<Guid>
 {
     // Id, UserName, Email, PasswordHash vb. alanları IdentityUser<Guid> sınıfından devralındı.

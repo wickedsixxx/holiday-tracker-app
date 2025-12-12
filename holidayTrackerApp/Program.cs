@@ -8,11 +8,10 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Servislerin Eklenmesi
+
 builder.Services.AddControllers();
 
-// --- YENÝ EKLENDÝ: CORS Politikasý ---
-// Tarayýcýnýn API'ye eriþim engeli (Failed to fetch) koymamasý için gerekli izinler.
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -23,7 +22,7 @@ builder.Services.AddCors(options =>
                   .AllowAnyHeader(); // Tüm baþlýklara izin ver
         });
 });
-// -------------------------------------
+
 
 // Connection string kontrolü
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -32,7 +31,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlite(connectionString));
 
-// Program.cs - builder.Services bölümüne ekle
+
 
 builder.Services.AddIdentity<Employee, IdentityRole<Guid>>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<AppDbContext>()
@@ -69,7 +68,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// --- YENÝ EKLENDÝ: CORS'u Devreye Al ---
+
 // Bu satýr UseHttpsRedirection'dan ÖNCE olmalýdýr.
 app.UseCors("AllowAll");
 // ---------------------------------------

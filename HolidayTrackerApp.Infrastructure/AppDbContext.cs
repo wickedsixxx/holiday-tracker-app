@@ -1,22 +1,21 @@
-﻿using HolidayTrackerApp.Domain.Entities; // Eğer Employee sınıfınız bu namespace'deyse
+﻿using HolidayTrackerApp.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using HolidayTrackerApp.Domain; // Employee sınıfının bulunduğu namespace
+using HolidayTrackerApp.Domain;
+using System;
+using System.Linq; // Query operasyonları için sıklıkla gereklidir
 
 namespace HolidayTrackerApp.Infrastructure
 {
-    // IdentityDbContext<TUser, TRole, TKey> formatı:
-    // TUser: Employee
-    // TRole: IdentityRole<Guid>
-    // TKey: Guid (Employee'nin Id tipi)
+    // AppDbContext, artık IdentityDbContext'ten miras alıyor.
     public sealed class AppDbContext : IdentityDbContext<Employee, IdentityRole<Guid>, Guid>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         { }
 
-        // Employee için DbSet'i IdentityDbContext otomatik tanımladığı için yoruma alıyoruz/siliyoruz.
-        // public DbSet<Employee> Employees { get; set; }
+        
+        public DbSet<Employee> Employees => base.Users;
 
         public DbSet<LeavePolicy> LeavePolicies { get; set; }
         public DbSet<LeaveBalance> LeaveBalances { get; set; }
@@ -27,15 +26,14 @@ namespace HolidayTrackerApp.Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Identity tablolarının doğru oluşturulması için bu satır en başta OLMALIDIR.
+            // Identity tablolarının doğru oluşturulması için bu satır EN BAŞTA OLMALIDIR.
             base.OnModelCreating(modelBuilder);
 
-            // Employee tablosu için Identity'nin varsayılanları üzerine kendi benzersiz indexinizi ekleyin
+            // Diğer Fluent API konfigürasyonlarınız...
             modelBuilder.Entity<Employee>()
                  .HasIndex(e => e.EmployeeNo)
                  .IsUnique();
 
-            // Diğer Fluent API konfigürasyonlarınız...
             modelBuilder.Entity<LeaveBalance>()
                 .HasKey(l => new { l.EmployeeId, l.Year });
 
